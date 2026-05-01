@@ -259,6 +259,23 @@
         const payload = `{direction:${direction},duration:${seconds}}`;
         set(ref(db, "autoLift"), payload);
       };
+
+      // --- 4. The "Connection Warm-Up" Ping ---
+      // This fires every time you pull the tab out of the background on your phone
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+          console.log("Tab woke up! Sending warm-up ping...");
+
+          // Send a timestamp to a dummy 'ping' variable in Firebase
+          // The changing timestamp ensures Firebase doesn't ignore it as duplicate data
+          set(ref(db, "ping"), Date.now());
+        }
+      });
+
+      // Also fire it once when the page first loads naturally
+      window.onload = function () {
+        set(ref(db, "ping"), Date.now());
+      };
     </script>
   </body>
 </html>
