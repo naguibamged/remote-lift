@@ -82,6 +82,46 @@
         border-radius: 5px;
         border: none;
       }
+
+      /* --- Connection UI Animations --- */
+      #connection-ui {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 30px; /* Reserves space so the page doesn't jump */
+        margin-bottom: 20px;
+      }
+
+      /* The Spinning Circle */
+      .spinner {
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgba(255, 255, 255, 0.2);
+        border-top-color: #ffeb3b; /* Yellow */
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        display: none; /* Hidden by default */
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* The Success Tick */
+      .tick {
+        color: #4caf50; /* Green */
+        font-size: 1.5rem;
+        display: none; /* Hidden by default */
+      }
+
+      /* The Error Message */
+      .conn-error {
+        color: #f44336;
+        font-size: 0.9rem;
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -92,6 +132,12 @@
       <span id="badge-text">SYSTEM IDLE ⏹️</span>
       <!-- The timer span (empty by default, slightly smaller/lighter) -->
       <span id="badge-timer"></span>
+    </div>
+    <!-- The Ping/Pong Connection Indicator -->
+    <div id="connection-ui">
+      <div id="conn-spinner" class="spinner"></div>
+      <div id="conn-tick" class="tick">✔️</div>
+      <div id="conn-error" class="conn-error">🔴 Offline</div>
     </div>
 
     <h2>Manual Control</h2>
@@ -260,22 +306,61 @@
         set(ref(db, "autoLift"), payload);
       };
 
-      // --- 4. The "Connection Warm-Up" Ping ---
-      // This fires every time you pull the tab out of the background on your phone
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible") {
-          console.log("Tab woke up! Sending warm-up ping...");
+      /// --- 4. The Ping/Pong Connection Monitor ---
+      let currentPingId = "";
+      let offlineTimeout = null;
 
-          // Send a timestamp to a dummy 'ping' variable in Firebase
-          // The changing timestamp ensures Firebase doesn't ignore it as duplicate data
-          set(ref(db, "ping"), Date.now());
+      function checkHardwareConnection() {
+        const spinner = document.getElementById("conn-spinner");
+        const tick = document.getElementById("conn-tick");
+        const errorMsg = document.getElementById("conn-error");
+
+        // 1. Reset the UI: Show spinner, hide the tick and errors
+        spinner.style.display = "block";
+        tick.style.display = "none";
+        errorMsg.style.display = "none";
+
+        // 2. Generate ID and send Ping
+        currentPingId = Date.now().toString();
+        set(ref(db, "ping"), currentPingId);
+
+        // 3. Start 3-second offline timer
+        if (offlineTimeout) clearTimeout(offlineTimeout);
+        offlineTimeout = setTimeout(() => {
+          spinner.style.display = "none";
+          errorMsg.style.display = "block"; // Only show error if the ESP32 fails to reply
+        }, 3000);
+      }
+
+      // Listener to catch the Pong
+      onValue(ref(db, "pong"), (snapshot) => {
+        const returnedPongId = snapshot.val();
+
+        // If the ESP32 echoed back our exact ping...
+        if (returnedPongId === currentPingId) {
+          if (offlineTimeout) clearTimeout(offlineTimeout); // Stop the error timer
+
+          const spinner = document.getElementById("conn-spinner");
+          const tick = document.getElementById("conn-tick");
+
+          // Swap the spinner for the green tick
+          spinner.style.display = "none";
+          tick.style.display = "block";
+
+          // Wait exactly 1 second (1000ms), then make the tick disappear
+          setTimeout(() => {
+            tick.style.display = "none";
+          }, 1000);
         }
       });
 
-      // Also fire it once when the page first loads naturally
-      window.onload = function () {
-        set(ref(db, "ping"), Date.now());
-      };
+      // Fire the ping on page load and tab wake-up
+      window.onload = checkHardwareConnection;
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+          checkHardwareConnection();
+        }
+      });
     </script>
   </body>
 </html>
