@@ -6,6 +6,35 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <style>
+    /* Make buttons look 3D and "press" down when clicked/touched */
+.btn {
+  transition: all 0.1s ease;
+  box-shadow: 0px 6px 0px #333; /* The 3D edge */
+  position: relative;
+}
+
+.btn:active {
+  box-shadow: 0px 2px 0px #333; /* Flattens when pressed */
+  top: 4px; /* Physically moves the button down */
+  transform: scale(0.98);
+}
+
+/* Hover effects to show it's clickable */
+.btn-up:hover { background-color: #45a049; }
+.btn-down:hover { background-color: #da190b; }
+
+/* The Live Status Badge */
+#status-badge {
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 5px;
+  background-color: #555;
+  color: white;
+  margin: 20px auto;
+  width: fit-content;
+  transition: background-color 0.3s ease;
+}
     body { font-family: Arial; text-align: center; margin-top: 50px; user-select: none; }
     .button { display: inline-block; padding: 30px 40px; font-size: 30px; cursor: pointer; border-radius: 10px; color: white; border: none; margin: 20px; width: 250px; }
     .btn-up { background-color: #4CAF50; }
