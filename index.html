@@ -1,77 +1,253 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Cloud Hoist Control</title>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <style>
-    /* Make buttons look 3D and "press" down when clicked/touched */
-.btn {
-  transition: all 0.1s ease;
-  box-shadow: 0px 6px 0px #333; /* The 3D edge */
-  position: relative;
-}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Industrial Hoist Controller</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background-color: #222;
+        color: white;
+        margin-top: 50px;
+      }
 
-.btn:active {
-  box-shadow: 0px 2px 0px #333; /* Flattens when pressed */
-  top: 4px; /* Physically moves the button down */
-  transform: scale(0.98);
-}
+      /* Live Status Badge */
+      #status-badge {
+        font-size: 1.2rem;
+        font-weight: bold;
+        padding: 15px 30px;
+        border-radius: 8px;
+        background-color: #555;
+        color: white;
+        margin: 20px auto;
+        width: fit-content;
+        transition: background-color 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      }
 
-/* Hover effects to show it's clickable */
-.btn-up:hover { background-color: #45a049; }
-.btn-down:hover { background-color: #da190b; }
+      /* 3D Button Styling */
+      .btn {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 20px 40px;
+        margin: 10px;
+        cursor: pointer;
+        transition: all 0.1s ease;
+        box-shadow: 0px 8px 0px #111;
+        position: relative;
+        user-select: none; /* Prevents text highlighting on mobile taps */
+        -webkit-user-select: none;
+      }
 
-/* The Live Status Badge */
-#status-badge {
-  font-size: 1.2rem;
-  font-weight: bold;
-  padding: 10px 20px;
-  border-radius: 5px;
-  background-color: #555;
-  color: white;
-  margin: 20px auto;
-  width: fit-content;
-  transition: background-color 0.3s ease;
-}
-    body { font-family: Arial; text-align: center; margin-top: 50px; user-select: none; }
-    .button { display: inline-block; padding: 30px 40px; font-size: 30px; cursor: pointer; border-radius: 10px; color: white; border: none; margin: 20px; width: 250px; }
-    .btn-up { background-color: #4CAF50; }
-    .btn-down { background-color: #2196F3; }
-    .btn-up:active, .btn-down:active { opacity: 0.7; }
-  </style>
-</head>
-<body>
-  <h1>Cloud Hoist</h1>
-  <!-- Passing 1 for UP, 0 for STOP -->
-  <button class="button btn-up" 
-    onmousedown="sendCommand(1)" onmouseup="sendCommand(0)" onmouseleave="sendCommand(0)"
-    ontouchstart="sendCommand(1)" ontouchend="sendCommand(0)">UP</button>
-  <br>
-  <!-- Passing 2 for DOWN, 0 for STOP -->
-  <button class="button btn-down" 
-    onmousedown="sendCommand(2)" onmouseup="sendCommand(0)" onmouseleave="sendCommand(0)"
-    ontouchstart="sendCommand(2)" ontouchend="sendCommand(0)">DOWN</button>
+      .btn:active {
+        box-shadow: 0px 2px 0px #111;
+        top: 6px;
+        transform: scale(0.98);
+      }
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyC4rm0V4SGMexR-G5jR_Tw_mia9iFGDviA",
-      databaseURL: "https://remote-lift-default-rtdb.asia-southeast1.firebasedatabase.app/",
-      projectId: "remote-lift" 
-    };
-    
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+      .btn-up {
+        background-color: #4caf50;
+      }
+      .btn-down {
+        background-color: #2196f3;
+      }
 
-    function sendCommand(actionVal) {
-      if(event && event.type == 'touchstart') { event.preventDefault(); }
-      
-      // Write the integer to the /lift node
-      database.ref('/lift').set(actionVal)
-        .then(() => console.log("Sent state: " + actionVal))
-        .catch((error) => console.error("Error writing to Firebase: ", error));
-    }
-  </script>
-</body>
+      .btn-up:hover {
+        background-color: #45a049;
+      }
+      .btn-down:hover {
+        background-color: #1a76c0;
+      }
+
+      /* Auto-Lift Section */
+      .auto-panel {
+        background-color: #333;
+        margin: 40px auto;
+        padding: 20px;
+        max-width: 400px;
+        border-radius: 10px;
+        border: 2px dashed #666;
+      }
+
+      input[type="number"] {
+        font-size: 1.2rem;
+        width: 60px;
+        padding: 5px;
+        text-align: center;
+        border-radius: 5px;
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Hoist Controller</h1>
+
+    <div id="status-badge">
+      <!-- The main text -->
+      <span id="badge-text">SYSTEM IDLE ⏹️</span>
+      <!-- The timer span (empty by default, slightly smaller/lighter) -->
+      <span id="badge-timer"></span>
+    </div>
+
+    <h2>Manual Control</h2>
+    <p>Hold to run, release to stop.</p>
+    <!-- Mouse and Touch events to handle both PC and Mobile -->
+    <button
+      class="btn btn-up"
+      onmousedown="startManual(1)"
+      onmouseup="stopManual()"
+      onmouseleave="stopManual()"
+      ontouchstart="startManual(1); event.preventDefault();"
+      ontouchend="stopManual(); event.preventDefault();"
+    >
+      HOLD UP ⬆️
+    </button>
+    <button
+      class="btn btn-down"
+      onmousedown="startManual(2)"
+      onmouseup="stopManual()"
+      onmouseleave="stopManual()"
+      ontouchstart="startManual(2); event.preventDefault();"
+      ontouchend="stopManual(); event.preventDefault();"
+    >
+      HOLD DOWN ⬇️
+    </button>
+
+    <div class="auto-panel">
+      <h2>Auto-Lift</h2>
+      <label>Duration (Seconds): </label>
+      <input type="number" id="auto-time" value="10" min="1" max="60" />
+      <br /><br />
+      <button
+        class="btn btn-up"
+        style="padding: 10px 20px; font-size: 1.2rem"
+        onclick="triggerAuto(1)"
+      >
+        AUTO UP
+      </button>
+      <button
+        class="btn btn-down"
+        style="padding: 10px 20px; font-size: 1.2rem"
+        onclick="triggerAuto(2)"
+      >
+        AUTO DOWN
+      </button>
+    </div>
+
+    <!-- Firebase v10 SDK -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+      import {
+        getDatabase,
+        ref,
+        set,
+        onValue,
+      } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+      // 🔴 REPLACE THESE WITH YOUR FIREBASE CREDENTIALS 🔴
+      const firebaseConfig = {
+        apiKey: "AIzaSyC4rm0V4SGMexR-G5jR_Tw_mia9iFGDviA",
+        authDomain: "remote-lift.firebaseapp.com",
+        databaseURL:
+          "https://remote-lift-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "remote-lift",
+        storageBucket: "remote-lift.firebasestorage.app",
+        messagingSenderId: "547559400957",
+        appId: "1:547559400957:web:a82b71b38d6408b3592594",
+        measurementId: "G-MHG5C8TBLH",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+
+      // --- Variables for the Timer Logic ---
+      let countdownInterval;
+      let previousState = 0;
+      let isAutoModeActive = false;
+      let timeRemaining = 0;
+      // --- 1. Live Status & Timer Listener ---
+      onValue(ref(db, "state"), (snapshot) => {
+        const state = snapshot.val();
+        const badge = document.getElementById("status-badge");
+        const badgeText = document.getElementById("badge-text");
+        const badgeTimer = document.getElementById("badge-timer");
+
+        // Apply the base text and color instantly
+        if (state === 1) {
+          badgeText.innerText = "MOVING UP ⬆️";
+          badge.style.backgroundColor = "#4CAF50";
+        } else if (state === 2) {
+          badgeText.innerText = "MOVING DOWN ⬇️";
+          badge.style.backgroundColor = "#2196f3";
+        } else {
+          badgeText.innerText = "SYSTEM IDLE ⏹️";
+          badge.style.backgroundColor = "#555";
+        }
+
+        // Timer Logic
+        if (state !== 0) {
+          if (previousState === 0 && isAutoModeActive) {
+            clearInterval(countdownInterval);
+            timeRemaining = parseInt(
+              document.getElementById("auto-time").value,
+            );
+
+            if (timeRemaining > 0) {
+              // Write to the separate span element
+              document.getElementById("badge-timer").style.display = "inline";
+              badgeTimer.innerText = `(${timeRemaining})`;
+
+              countdownInterval = setInterval(() => {
+                timeRemaining--;
+                if (timeRemaining >= 0) {
+                  // Only update the timer span, leave the main text alone
+                  document.getElementById("badge-timer").style.display =
+                    "inline";
+                  badgeTimer.innerText = `(${timeRemaining})`;
+                }
+              }, 1000);
+            }
+          }
+        } else {
+          // System is IDLE
+          clearInterval(countdownInterval);
+          isAutoModeActive = false;
+          // Clear the timer span so it disappears
+          document.getElementById("badge-timer").style.display = "none";
+        }
+
+        previousState = state;
+      });
+
+      // --- 2. Manual Controls ---
+      window.startManual = function (direction) {
+        // Instantly kill the timer display so the layout doesn't jump under your finger
+        isAutoModeActive = false;
+        document.getElementById("badge-timer").style.display = "none";
+        clearInterval(countdownInterval);
+        set(ref(db, "autoLift"), "{direction:0,duration:0}");
+
+        set(ref(db, "lift"), direction);
+      };
+
+      window.stopManual = function () {
+        set(ref(db, "lift"), 0);
+      };
+
+      // --- 3. Auto-Lift Controls ---
+      window.triggerAuto = function (direction) {
+        isAutoModeActive = true; // Tell the system an Auto sequence started
+
+        const seconds = document.getElementById("auto-time").value;
+        timeRemaining = seconds;
+        const payload = `{direction:${direction},duration:${seconds}}`;
+        set(ref(db, "autoLift"), payload);
+      };
+    </script>
+  </body>
 </html>
