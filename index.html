@@ -88,12 +88,12 @@
       }
       .tab-btn {
         flex: 1;
-        padding: 12px 5px;
+        padding: 12px 2px;
         background: transparent;
         color: var(--text-muted);
         border: none;
         cursor: pointer;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         font-weight: bold;
         transition: 0.3s;
       }
@@ -311,25 +311,37 @@
     </style>
   </head>
   <body>
-    <!-- Login Overlay -->
+    <!-- Standard Login Form for Browser Password Manager -->
     <div id="login-overlay">
-      <div class="login-box">
+      <form class="login-box" id="login-form">
         <h2>System Login</h2>
-        <input type="text" id="login-id" placeholder="User ID" />
-        <input type="password" id="login-pass" placeholder="Password" />
-        <button onclick="attemptLogin()">Access System</button>
+        <input
+          type="text"
+          id="login-id"
+          placeholder="User ID"
+          autocomplete="username"
+          required
+        />
+        <input
+          type="password"
+          id="login-pass"
+          placeholder="Password"
+          autocomplete="current-password"
+          required
+        />
+        <button type="submit">Access System</button>
         <div
           id="login-error"
           style="color: var(--danger); margin-top: 10px; display: none"
         >
           Invalid credentials
         </div>
-      </div>
+      </form>
     </div>
 
     <!-- Main Application -->
     <div id="app-container">
-      <!-- Tab Navigation -->
+      <!-- Tab Navigation with Updated Labels -->
       <div class="tabs-header">
         <button class="tab-btn active" onclick="switchTab('tab-main', this)">
           Main 🔘
@@ -535,6 +547,36 @@
             RESET SYSTEM STATE
           </button>
         </div>
+
+        <div
+          style="
+            margin-top: 30px;
+            border-top: 1px solid #444;
+            padding-top: 20px;
+          "
+        >
+          <h3
+            style="
+              color: var(--text-main);
+              border-bottom: none;
+              padding-bottom: 0;
+            "
+          >
+            Account
+          </h3>
+          <button
+            class="ping-btn"
+            style="
+              width: 100%;
+              padding: 12px;
+              font-size: 1rem;
+              margin-top: 10px;
+            "
+            onclick="logOut()"
+          >
+            Log Out
+          </button>
+        </div>
       </div>
     </div>
 
@@ -577,26 +619,37 @@
         btnElement.classList.add("active");
       };
 
-      // --- Authentication ---
-      window.attemptLogin = function () {
-        const userId = document.getElementById("login-id").value;
-        const userPass = document.getElementById("login-pass").value;
-        const errorMsg = document.getElementById("login-error");
+      // --- Authentication Logic ---
 
-        get(child(ref(db), `users/${userId}`))
-          .then((snapshot) => {
-            if (snapshot.exists() && snapshot.val() === userPass) {
-              document.getElementById("login-overlay").style.display = "none";
-              document.getElementById("app-container").style.display = "block";
-              initializeAppLogic();
-            } else {
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault(); // Prevents the page from refreshing on submit
+
+          const userId = document.getElementById("login-id").value;
+          const userPass = document.getElementById("login-pass").value;
+          const errorMsg = document.getElementById("login-error");
+
+          get(child(ref(db), `users/${userId}`))
+            .then((snapshot) => {
+              if (snapshot.exists() && snapshot.val() === userPass) {
+                // Success - hide overlay, show app
+                document.getElementById("login-overlay").style.display = "none";
+                document.getElementById("app-container").style.display =
+                  "block";
+                initializeAppLogic();
+              } else {
+                errorMsg.style.display = "block";
+              }
+            })
+            .catch(() => {
+              errorMsg.innerText = "Connection error.";
               errorMsg.style.display = "block";
-            }
-          })
-          .catch(() => {
-            errorMsg.innerText = "Connection error.";
-            errorMsg.style.display = "block";
-          });
+            });
+        });
+
+      window.logOut = function () {
+        location.reload(); // Refresh the page to show login screen
       };
 
       // --- Main Application Logic ---
@@ -738,7 +791,7 @@
           set(ref(db, "doorState"), 0);
 
           alert("System flags reset to 0.");
-          forcePing(); // Verify connection status after reset
+          forcePing();
         };
 
         // 6. Settings Database Update Helper
@@ -753,11 +806,11 @@
           if (isBool) finalValue = value;
 
           set(ref(db, `settings/${path}`), finalValue).then(() => {
-            forcePing(); // Automatically ping the ESP after a setting updates
+            forcePing();
           });
         };
 
-        // 7. Ping/Pong Heartbeat Logic (Event-Based)
+        // 7. Ping/Pong Heartbeat Logic
         let currentPingId = "";
         let offlineTimeout = null;
 
@@ -784,7 +837,6 @@
           checkConnection();
         };
 
-        // Listen for the Pong response
         onValue(ref(db, "pong"), (snapshot) => {
           if (snapshot.val() === currentPingId) {
             if (offlineTimeout) clearTimeout(offlineTimeout);
@@ -795,15 +847,11 @@
           }
         });
 
-        // Fire a ping when the page is brought back into focus or un-minimized
         document.addEventListener("visibilitychange", () => {
-          if (document.visibilityState === "visible") {
-            forcePing();
-          }
+          if (document.visibilityState === "visible") forcePing();
         });
-        window.addEventListener("focus", forcePing); // Additional fallback
+        window.addEventListener("focus", forcePing);
 
-        // Initial Ping
         checkConnection();
       }
     </script>
