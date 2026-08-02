@@ -124,9 +124,13 @@
         transition: background-color 0.3s;
       }
       .conn-ui {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         font-size: 0.9rem;
-        margin-top: 10px;
-        height: 20px;
+        margin-top: 15px;
+        height: 25px;
+        gap: 10px;
       }
       .spinner {
         display: inline-block;
@@ -141,6 +145,20 @@
         to {
           transform: rotate(360deg);
         }
+      }
+
+      .ping-btn {
+        background-color: #444;
+        color: white;
+        border: 1px solid #666;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .ping-btn:active {
+        background-color: #222;
       }
 
       /* Reusable Toggle Switch */
@@ -200,12 +218,12 @@
       }
 
       /* Main Door Button */
-      .center-panel {
+      .center-wrapper {
         display: flex;
         flex-direction: column;
         align-items: center;
         background: var(--bg-panel);
-        padding: 20px;
+        padding: 30px 20px;
         border-radius: 10px;
       }
       #door-btn {
@@ -223,7 +241,7 @@
           transform 0.1s,
           filter 0.1s,
           box-shadow 0.1s;
-        touch-action: none; /* Prevents mobile scrolling while holding */
+        touch-action: none;
         user-select: none;
         -webkit-user-select: none;
         margin-top: 20px;
@@ -273,6 +291,23 @@
         color: #ffcccc;
         margin-bottom: 15px;
       }
+
+      .reset-btn {
+        background-color: var(--danger);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        width: 100%;
+        font-size: 1rem;
+        margin-top: 10px;
+        transition: filter 0.2s;
+      }
+      .reset-btn:active {
+        filter: brightness(0.8);
+      }
     </style>
   </head>
   <body>
@@ -317,23 +352,30 @@
           <span id="conn-text" style="color: var(--text-muted)"
             >Checking connection...</span
           >
+          <button class="ping-btn" onclick="forcePing()">Ping Now</button>
         </div>
       </div>
 
       <!-- TAB 1: MAIN CONTROLS -->
-      <div id="tab-main" class="tab-content active center-panel">
-        <div
-          class="toggle-container"
-          style="width: 100%; justify-content: center; gap: 20px"
-        >
-          <span id="label-hold" class="mode-label active-mode">Hold</span>
-          <label class="switch">
-            <input type="checkbox" id="mode-toggle" onchange="updateModeUI()" />
-            <span class="slider" style="background-color: #444"></span>
-          </label>
-          <span id="label-tap" class="mode-label">Tap</span>
+      <div id="tab-main" class="tab-content active">
+        <div class="center-wrapper">
+          <div
+            class="toggle-container"
+            style="width: 100%; justify-content: center; gap: 20px"
+          >
+            <span id="label-hold" class="mode-label active-mode">Hold</span>
+            <label class="switch">
+              <input
+                type="checkbox"
+                id="mode-toggle"
+                onchange="updateModeUI()"
+              />
+              <span class="slider" style="background-color: #444"></span>
+            </label>
+            <span id="label-tap" class="mode-label">Tap</span>
+          </div>
+          <button id="door-btn">HOLD<br />TO UNLOCK</button>
         </div>
-        <button id="door-btn">HOLD<br />TO UNLOCK</button>
       </div>
 
       <!-- TAB 2: PHYSICAL TRIGGER -->
@@ -396,7 +438,6 @@
           <span id="phys-cond-time" class="mode-label">Time</span>
         </div>
 
-        <!-- Dynamic Inputs: Count -->
         <div id="phys-count-group" style="display: block">
           <div class="input-row">
             <label>Allowed Clicks:</label>
@@ -409,7 +450,6 @@
           </div>
         </div>
 
-        <!-- Dynamic Inputs: Time -->
         <div id="phys-time-group" style="display: none">
           <div class="input-row">
             <label>Start Time:</label>
@@ -467,6 +507,33 @@
             max="60"
             onchange="updateSetting('singleTapDuration', this.value, true)"
           />
+        </div>
+
+        <div
+          style="
+            margin-top: 30px;
+            border-top: 1px solid #444;
+            padding-top: 20px;
+          "
+        >
+          <h3
+            style="color: var(--danger); border-bottom: none; padding-bottom: 0"
+          >
+            System Recovery
+          </h3>
+          <p
+            style="
+              font-size: 0.85rem;
+              color: var(--text-muted);
+              margin-bottom: 15px;
+            "
+          >
+            Use this to clear stuck commands if the hardware disconnected
+            unexpectedly while running a task.
+          </p>
+          <button class="reset-btn" onclick="resetSystemState()">
+            RESET SYSTEM STATE
+          </button>
         </div>
       </div>
     </div>
@@ -582,7 +649,6 @@
           }
         });
 
-        // Live update for count decrementing
         onValue(ref(db, "settings/physButton/Count"), (snapshot) => {
           if (snapshot.exists())
             document.getElementById("set-phys-count").value = snapshot.val();
@@ -630,30 +696,28 @@
             : "mode-label";
           btn.innerHTML = isTapMode ? "TAP<br>TO UNLOCK" : "HOLD<br>TO UNLOCK";
           btn.style.backgroundColor = isTapMode ? "var(--success)" : "#444";
-          // Change slider color based on mode
           document.querySelector(
             "#mode-toggle + .slider",
           ).style.backgroundColor = isTapMode ? "var(--success)" : "#444";
         };
 
-        // 4. Robust Button Pointer Events (Fixes Mobile Bug & Adds Visual Feedback)
+        // 4. Robust Button Pointer Events
         btn.addEventListener("pointerdown", (e) => {
-          btn.classList.add("btn-pressed"); // Add visual press state
+          btn.classList.add("btn-pressed");
           if (!toggle.checked) {
-            set(ref(db, "command/hold"), 1); // Hold Mode: Start
+            set(ref(db, "command/hold"), 1);
           }
         });
 
         btn.addEventListener("pointerup", (e) => {
-          btn.classList.remove("btn-pressed"); // Remove visual press state
+          btn.classList.remove("btn-pressed");
           if (!toggle.checked) {
-            set(ref(db, "command/hold"), 0); // Hold Mode: End
+            set(ref(db, "command/hold"), 0);
           } else {
-            set(ref(db, "command/tap"), 1); // Tap Mode: Fire command
+            set(ref(db, "command/tap"), 1);
           }
         });
 
-        // Failsafe if finger slides off the button while holding
         btn.addEventListener("pointerleave", (e) => {
           if (btn.classList.contains("btn-pressed")) {
             btn.classList.remove("btn-pressed");
@@ -667,7 +731,17 @@
           }
         });
 
-        // 5. Settings Database Update Helper
+        // 5. System Reset Function
+        window.resetSystemState = function () {
+          set(ref(db, "command/hold"), 0);
+          set(ref(db, "command/tap"), 0);
+          set(ref(db, "doorState"), 0);
+
+          alert("System flags reset to 0.");
+          forcePing(); // Verify connection status after reset
+        };
+
+        // 6. Settings Database Update Helper
         window.updateSetting = function (
           path,
           value,
@@ -677,10 +751,13 @@
           let finalValue = value;
           if (isNumber) finalValue = Number(value);
           if (isBool) finalValue = value;
-          set(ref(db, `settings/${path}`), finalValue);
+
+          set(ref(db, `settings/${path}`), finalValue).then(() => {
+            forcePing(); // Automatically ping the ESP after a setting updates
+          });
         };
 
-        // 6. Ping/Pong Heartbeat
+        // 7. Ping/Pong Heartbeat Logic (Event-Based)
         let currentPingId = "";
         let offlineTimeout = null;
 
@@ -703,6 +780,11 @@
           }, 3000);
         }
 
+        window.forcePing = function () {
+          checkConnection();
+        };
+
+        // Listen for the Pong response
         onValue(ref(db, "pong"), (snapshot) => {
           if (snapshot.val() === currentPingId) {
             if (offlineTimeout) clearTimeout(offlineTimeout);
@@ -713,8 +795,16 @@
           }
         });
 
+        // Fire a ping when the page is brought back into focus or un-minimized
+        document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "visible") {
+            forcePing();
+          }
+        });
+        window.addEventListener("focus", forcePing); // Additional fallback
+
+        // Initial Ping
         checkConnection();
-        setInterval(checkConnection, 10000);
       }
     </script>
   </body>
