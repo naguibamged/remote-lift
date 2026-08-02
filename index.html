@@ -341,7 +341,7 @@
 
     <!-- Main Application -->
     <div id="app-container">
-      <!-- Tab Navigation with Updated Labels -->
+      <!-- Tab Navigation -->
       <div class="tabs-header">
         <button class="tab-btn active" onclick="switchTab('tab-main', this)">
           Main 🔘
@@ -408,9 +408,10 @@
           </label>
         </div>
 
+        <!-- REVERSED: Hold on the left (unchecked), Tap on the right (checked) -->
         <div class="toggle-container">
-          <span id="phys-act-tap" class="mode-label active-mode"
-            >Action: Tap</span
+          <span id="phys-act-hold" class="mode-label active-mode"
+            >Action: Hold</span
           >
           <label class="switch">
             <input
@@ -420,13 +421,13 @@
                 updatePhysActionUI();
                 updateSetting(
                   'physButton/Action',
-                  this.checked ? 'hold' : 'tap',
+                  this.checked ? 'tap' : 'hold',
                 );
               "
             />
             <span class="slider"></span>
           </label>
-          <span id="phys-act-hold" class="mode-label">Hold</span>
+          <span id="phys-act-tap" class="mode-label">Tap</span>
         </div>
 
         <div class="toggle-container">
@@ -624,7 +625,7 @@
       document
         .getElementById("login-form")
         .addEventListener("submit", function (e) {
-          e.preventDefault(); // Prevents the page from refreshing on submit
+          e.preventDefault();
 
           const userId = document.getElementById("login-id").value;
           const userPass = document.getElementById("login-pass").value;
@@ -633,7 +634,6 @@
           get(child(ref(db), `users/${userId}`))
             .then((snapshot) => {
               if (snapshot.exists() && snapshot.val() === userPass) {
-                // Success - hide overlay, show app
                 document.getElementById("login-overlay").style.display = "none";
                 document.getElementById("app-container").style.display =
                   "block";
@@ -649,7 +649,7 @@
         });
 
       window.logOut = function () {
-        location.reload(); // Refresh the page to show login screen
+        location.reload();
       };
 
       // --- Main Application Logic ---
@@ -684,8 +684,9 @@
               document.getElementById("phys-enabled-toggle").checked =
                 data.physButton.Enabled;
 
+              // REVERSED: Checked = Tap now
               document.getElementById("phys-action-toggle").checked =
-                data.physButton.Action === "hold";
+                data.physButton.Action === "tap";
               updatePhysActionUI();
 
               document.getElementById("phys-condition-toggle").checked =
@@ -727,11 +728,11 @@
         };
 
         window.updatePhysActionUI = function () {
-          const isHold = document.getElementById("phys-action-toggle").checked;
-          document.getElementById("phys-act-hold").className = isHold
+          const isTap = document.getElementById("phys-action-toggle").checked;
+          document.getElementById("phys-act-tap").className = isTap
             ? "mode-label active-mode"
             : "mode-label";
-          document.getElementById("phys-act-tap").className = isHold
+          document.getElementById("phys-act-hold").className = isTap
             ? "mode-label"
             : "mode-label active-mode";
         };
