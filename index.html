@@ -16,7 +16,7 @@
       }
 
       body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         background-color: var(--bg-dark);
         color: var(--text-main);
         margin: 0;
@@ -29,7 +29,10 @@
       /* --- Login Overlay --- */
       #login-overlay {
         position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         background-color: rgba(0, 0, 0, 0.9);
         display: flex;
         flex-direction: column;
@@ -42,10 +45,28 @@
         padding: 30px;
         border-radius: 10px;
         text-align: center;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       }
-      .login-box input { display: block; margin: 10px auto; padding: 10px; width: 80%; border-radius: 5px; border: 1px solid #555; background: #222; color: white; }
-      .login-box button { margin-top: 15px; padding: 10px 20px; background-color: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+      .login-box input {
+        display: block;
+        margin: 10px auto;
+        padding: 10px;
+        width: 80%;
+        border-radius: 5px;
+        border: 1px solid #555;
+        background: #222;
+        color: white;
+      }
+      .login-box button {
+        margin-top: 15px;
+        padding: 10px 20px;
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+      }
 
       /* --- Main App UI --- */
       #app-container {
@@ -80,55 +101,181 @@
         background-color: var(--primary);
         color: white;
       }
-      .tab-content { display: none; }
-      .tab-content.active { display: block; }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
 
       /* Status & Connection */
-      .header-section { text-align: center; margin-bottom: 20px; }
-      #status-badge { font-size: 1.2rem; font-weight: bold; padding: 15px 30px; border-radius: 8px; background-color: #555; display: inline-block; margin-top: 10px; transition: background-color 0.3s; }
-      .conn-ui { font-size: 0.9rem; margin-top: 10px; height: 20px; }
-      .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #ffeb3b; border-radius: 50%; animation: spin 1s linear infinite; }
-      @keyframes spin { to { transform: rotate(360deg); } }
+      .header-section {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      #status-badge {
+        font-size: 1.2rem;
+        font-weight: bold;
+        padding: 15px 30px;
+        border-radius: 8px;
+        background-color: #555;
+        display: inline-block;
+        margin-top: 10px;
+        transition: background-color 0.3s;
+      }
+      .conn-ui {
+        font-size: 0.9rem;
+        margin-top: 10px;
+        height: 20px;
+      }
+      .spinner {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #ffeb3b;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
 
       /* Reusable Toggle Switch */
-      .toggle-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-weight: bold; }
-      .switch { position: relative; display: inline-block; width: 54px; height: 28px; }
-      .switch input { opacity: 0; width: 0; height: 0; }
-      .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 34px; }
-      .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-      input:checked + .slider { background-color: var(--primary); }
-      input:checked + .slider:before { transform: translateX(26px); }
-      .mode-label { font-size: 0.95rem; color: var(--text-muted); transition: color 0.3s; }
-      .active-mode { color: var(--text-main); }
+      .toggle-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        font-weight: bold;
+      }
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 54px;
+        height: 28px;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #555;
+        transition: 0.4s;
+        border-radius: 34px;
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+      input:checked + .slider {
+        background-color: var(--primary);
+      }
+      input:checked + .slider:before {
+        transform: translateX(26px);
+      }
+      .mode-label {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        transition: color 0.3s;
+      }
+      .active-mode {
+        color: var(--text-main);
+      }
 
       /* Main Door Button */
-      .center-panel { display: flex; flex-direction: column; align-items: center; background: var(--bg-panel); padding: 20px; border-radius: 10px; }
+      .center-panel {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: var(--bg-panel);
+        padding: 20px;
+        border-radius: 10px;
+      }
       #door-btn {
-        width: 220px; height: 220px; border-radius: 50%; border: none;
-        background-color: #444; color: white; font-size: 1.6rem; font-weight: bold;
-        cursor: pointer; box-shadow: 0 8px 15px rgba(0,0,0,0.5);
-        transition: transform 0.1s, filter 0.1s, box-shadow 0.1s;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        border: none;
+        background-color: #444;
+        color: white;
+        font-size: 1.6rem;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+        transition:
+          transform 0.1s,
+          filter 0.1s,
+          box-shadow 0.1s;
         touch-action: none; /* Prevents mobile scrolling while holding */
-        user-select: none; -webkit-user-select: none;
+        user-select: none;
+        -webkit-user-select: none;
         margin-top: 20px;
       }
       .btn-pressed {
         transform: scale(0.94);
         filter: brightness(0.7);
-        box-shadow: inset 0 8px 15px rgba(0,0,0,0.8) !important;
+        box-shadow: inset 0 8px 15px rgba(0, 0, 0, 0.8) !important;
       }
 
       /* Settings Panels */
-      .panel { background: var(--bg-panel); padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-      .panel h3 { margin-top: 0; font-size: 1.2rem; color: var(--primary); border-bottom: 1px solid #444; padding-bottom: 10px; }
-      .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-      input[type="number"], input[type="time"] { background: #222; color: white; border: 1px solid #555; padding: 8px 12px; border-radius: 5px; width: 120px; font-size: 1rem; }
-      
-      .warning-box { background: rgba(244, 67, 54, 0.1); border-left: 4px solid var(--danger); padding: 10px; font-size: 0.85rem; color: #ffcccc; margin-bottom: 15px; }
+      .panel {
+        background: var(--bg-panel);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+      .panel h3 {
+        margin-top: 0;
+        font-size: 1.2rem;
+        color: var(--primary);
+        border-bottom: 1px solid #444;
+        padding-bottom: 10px;
+      }
+      .input-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      input[type="number"],
+      input[type="time"] {
+        background: #222;
+        color: white;
+        border: 1px solid #555;
+        padding: 8px 12px;
+        border-radius: 5px;
+        width: 120px;
+        font-size: 1rem;
+      }
+
+      .warning-box {
+        background: rgba(244, 67, 54, 0.1);
+        border-left: 4px solid var(--danger);
+        padding: 10px;
+        font-size: 0.85rem;
+        color: #ffcccc;
+        margin-bottom: 15px;
+      }
     </style>
   </head>
   <body>
-
     <!-- Login Overlay -->
     <div id="login-overlay">
       <div class="login-box">
@@ -136,89 +283,149 @@
         <input type="text" id="login-id" placeholder="User ID" />
         <input type="password" id="login-pass" placeholder="Password" />
         <button onclick="attemptLogin()">Access System</button>
-        <div id="login-error" style="color: var(--danger); margin-top: 10px; display: none;">Invalid credentials</div>
+        <div
+          id="login-error"
+          style="color: var(--danger); margin-top: 10px; display: none"
+        >
+          Invalid credentials
+        </div>
       </div>
     </div>
 
     <!-- Main Application -->
     <div id="app-container">
-      
       <!-- Tab Navigation -->
       <div class="tabs-header">
-        <button class="tab-btn active" onclick="switchTab('tab-main', this)">Main</button>
-        <button class="tab-btn" onclick="switchTab('tab-phys', this)">Physical</button>
-        <button class="tab-btn" onclick="switchTab('tab-keep', this)">Schedule</button>
-        <button class="tab-btn" onclick="switchTab('tab-settings', this)">Settings</button>
+        <button class="tab-btn active" onclick="switchTab('tab-main', this)">
+          Main
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-phys', this)">
+          Physical
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-keep', this)">
+          Schedule
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-settings', this)">
+          Settings
+        </button>
       </div>
 
       <div class="header-section">
         <div id="status-badge">SYSTEM LOCKED 🔒</div>
         <div class="conn-ui">
-          <span id="conn-spinner" class="spinner" style="display: none;"></span>
-          <span id="conn-text" style="color: var(--text-muted);">Checking connection...</span>
+          <span id="conn-spinner" class="spinner" style="display: none"></span>
+          <span id="conn-text" style="color: var(--text-muted)"
+            >Checking connection...</span
+          >
         </div>
       </div>
 
       <!-- TAB 1: MAIN CONTROLS -->
       <div id="tab-main" class="tab-content active center-panel">
-        <div class="toggle-container" style="width: 100%; justify-content: center; gap: 20px;">
+        <div
+          class="toggle-container"
+          style="width: 100%; justify-content: center; gap: 20px"
+        >
           <span id="label-hold" class="mode-label active-mode">Hold</span>
           <label class="switch">
-            <input type="checkbox" id="mode-toggle" onchange="updateModeUI()">
-            <span class="slider" style="background-color: #444;"></span>
+            <input type="checkbox" id="mode-toggle" onchange="updateModeUI()" />
+            <span class="slider" style="background-color: #444"></span>
           </label>
           <span id="label-tap" class="mode-label">Tap</span>
         </div>
-        <button id="door-btn">HOLD<br>TO UNLOCK</button>
+        <button id="door-btn">HOLD<br />TO UNLOCK</button>
       </div>
 
       <!-- TAB 2: PHYSICAL TRIGGER -->
       <div id="tab-phys" class="tab-content panel">
         <h3>Physical Trigger</h3>
-        
+
         <div class="toggle-container">
           <span class="mode-label active-mode">Enable Button</span>
           <label class="switch">
-            <input type="checkbox" id="phys-enabled-toggle" onchange="updateSetting('physButton/Enabled', this.checked, false, true)">
+            <input
+              type="checkbox"
+              id="phys-enabled-toggle"
+              onchange="
+                updateSetting('physButton/Enabled', this.checked, false, true)
+              "
+            />
             <span class="slider"></span>
           </label>
         </div>
 
         <div class="toggle-container">
-          <span id="phys-act-tap" class="mode-label active-mode">Action: Tap</span>
+          <span id="phys-act-tap" class="mode-label active-mode"
+            >Action: Tap</span
+          >
           <label class="switch">
-            <input type="checkbox" id="phys-action-toggle" onchange="updatePhysActionUI(); updateSetting('physButton/Action', this.checked ? 'hold' : 'tap')">
+            <input
+              type="checkbox"
+              id="phys-action-toggle"
+              onchange="
+                updatePhysActionUI();
+                updateSetting(
+                  'physButton/Action',
+                  this.checked ? 'hold' : 'tap',
+                );
+              "
+            />
             <span class="slider"></span>
           </label>
           <span id="phys-act-hold" class="mode-label">Hold</span>
         </div>
 
         <div class="toggle-container">
-          <span id="phys-cond-count" class="mode-label active-mode">Condition: Count</span>
+          <span id="phys-cond-count" class="mode-label active-mode"
+            >Condition: Count</span
+          >
           <label class="switch">
-            <input type="checkbox" id="phys-condition-toggle" onchange="updatePhysConditionUI(); updateSetting('physButton/Condition', this.checked ? 'time' : 'count')">
+            <input
+              type="checkbox"
+              id="phys-condition-toggle"
+              onchange="
+                updatePhysConditionUI();
+                updateSetting(
+                  'physButton/Condition',
+                  this.checked ? 'time' : 'count',
+                );
+              "
+            />
             <span class="slider"></span>
           </label>
           <span id="phys-cond-time" class="mode-label">Time</span>
         </div>
 
         <!-- Dynamic Inputs: Count -->
-        <div id="phys-count-group" style="display: block;">
+        <div id="phys-count-group" style="display: block">
           <div class="input-row">
             <label>Allowed Clicks:</label>
-            <input type="number" id="set-phys-count" min="0" onchange="updateSetting('physButton/Count', this.value, true)">
+            <input
+              type="number"
+              id="set-phys-count"
+              min="0"
+              onchange="updateSetting('physButton/Count', this.value, true)"
+            />
           </div>
         </div>
 
         <!-- Dynamic Inputs: Time -->
-        <div id="phys-time-group" style="display: none;">
+        <div id="phys-time-group" style="display: none">
           <div class="input-row">
             <label>Start Time:</label>
-            <input type="time" id="set-phys-start" onchange="updateSetting('physButton/Start', this.value)">
+            <input
+              type="time"
+              id="set-phys-start"
+              onchange="updateSetting('physButton/Start', this.value)"
+            />
           </div>
           <div class="input-row">
             <label>End Time:</label>
-            <input type="time" id="set-phys-end" onchange="updateSetting('physButton/End', this.value)">
+            <input
+              type="time"
+              id="set-phys-end"
+              onchange="updateSetting('physButton/End', this.value)"
+            />
           </div>
         </div>
       </div>
@@ -227,15 +434,24 @@
       <div id="tab-keep" class="tab-content panel">
         <h3>Keep Open Schedule</h3>
         <div class="warning-box">
-          ⚠️ <strong>Hardware Warning:</strong> Sustained power to a standard solenoid latch can cause overheating and damage to the coil.
+          ⚠️ <strong>Hardware Warning:</strong> Sustained power to a standard
+          solenoid latch can cause overheating and damage to the coil.
         </div>
         <div class="input-row">
           <label>Start Time:</label>
-          <input type="time" id="set-keep-start" onchange="updateSetting('keepOpen/Start', this.value)">
+          <input
+            type="time"
+            id="set-keep-start"
+            onchange="updateSetting('keepOpen/Start', this.value)"
+          />
         </div>
         <div class="input-row">
           <label>End Time:</label>
-          <input type="time" id="set-keep-end" onchange="updateSetting('keepOpen/End', this.value)">
+          <input
+            type="time"
+            id="set-keep-end"
+            onchange="updateSetting('keepOpen/End', this.value)"
+          />
         </div>
       </div>
 
@@ -244,62 +460,80 @@
         <h3>System Settings</h3>
         <div class="input-row">
           <label>Single Tap Duration (sec):</label>
-          <input type="number" id="set-tap-dur" min="1" max="60" onchange="updateSetting('singleTapDuration', this.value, true)">
+          <input
+            type="number"
+            id="set-tap-dur"
+            min="1"
+            max="60"
+            onchange="updateSetting('singleTapDuration', this.value, true)"
+          />
         </div>
       </div>
-
     </div>
 
     <!-- Firebase v10 SDK -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-      import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+      import {
+        getDatabase,
+        ref,
+        set,
+        get,
+        child,
+        onValue,
+      } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
       // 🔴 REPLACE WITH YOUR FIREBASE CONFIG
       const firebaseConfig = {
         apiKey: "AIzaSyC4rm0V4SGMexR-G5jR_Tw_mia9iFGDviA",
         authDomain: "remote-lift.firebaseapp.com",
-        databaseURL: "https://remote-lift-default-rtdb.asia-southeast1.firebasedatabase.app",
+        databaseURL:
+          "https://remote-lift-default-rtdb.asia-southeast1.firebasedatabase.app",
         projectId: "remote-lift",
         storageBucket: "remote-lift.firebasestorage.app",
         messagingSenderId: "547559400957",
-        appId: "1:547559400957:web:a82b71b38d6408b3592594"
+        appId: "1:547559400957:web:a82b71b38d6408b3592594",
       };
 
       const app = initializeApp(firebaseConfig);
       const db = getDatabase(app);
 
       // --- Tab Switching Logic ---
-      window.switchTab = function(tabId, btnElement) {
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        btnElement.classList.add('active');
+      window.switchTab = function (tabId, btnElement) {
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((tab) => tab.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        document.getElementById(tabId).classList.add("active");
+        btnElement.classList.add("active");
       };
 
       // --- Authentication ---
-      window.attemptLogin = function() {
+      window.attemptLogin = function () {
         const userId = document.getElementById("login-id").value;
         const userPass = document.getElementById("login-pass").value;
         const errorMsg = document.getElementById("login-error");
 
-        get(child(ref(db), `users/${userId}`)).then((snapshot) => {
-          if (snapshot.exists() && snapshot.val() === userPass) {
-            document.getElementById("login-overlay").style.display = "none";
-            document.getElementById("app-container").style.display = "block";
-            initializeAppLogic();
-          } else {
+        get(child(ref(db), `users/${userId}`))
+          .then((snapshot) => {
+            if (snapshot.exists() && snapshot.val() === userPass) {
+              document.getElementById("login-overlay").style.display = "none";
+              document.getElementById("app-container").style.display = "block";
+              initializeAppLogic();
+            } else {
+              errorMsg.style.display = "block";
+            }
+          })
+          .catch(() => {
+            errorMsg.innerText = "Connection error.";
             errorMsg.style.display = "block";
-          }
-        }).catch(() => {
-          errorMsg.innerText = "Connection error.";
-          errorMsg.style.display = "block";
-        });
+          });
       };
 
       // --- Main Application Logic ---
       function initializeAppLogic() {
-        
         // 1. Live Door State Badge
         onValue(ref(db, "doorState"), (snapshot) => {
           const state = snapshot.val();
@@ -317,59 +551,89 @@
         get(child(ref(db), "settings")).then((snapshot) => {
           if (snapshot.exists()) {
             const data = snapshot.val();
-            document.getElementById("set-tap-dur").value = data.singleTapDuration || 3;
-            
-            if(data.keepOpen) {
-              document.getElementById("set-keep-start").value = data.keepOpen.Start || "";
-              document.getElementById("set-keep-end").value = data.keepOpen.End || "";
+            document.getElementById("set-tap-dur").value =
+              data.singleTapDuration || 3;
+
+            if (data.keepOpen) {
+              document.getElementById("set-keep-start").value =
+                data.keepOpen.Start || "";
+              document.getElementById("set-keep-end").value =
+                data.keepOpen.End || "";
             }
-            if(data.physButton) {
-              document.getElementById("phys-enabled-toggle").checked = data.physButton.Enabled;
-              
-              document.getElementById("phys-action-toggle").checked = (data.physButton.Action === "hold");
+            if (data.physButton) {
+              document.getElementById("phys-enabled-toggle").checked =
+                data.physButton.Enabled;
+
+              document.getElementById("phys-action-toggle").checked =
+                data.physButton.Action === "hold";
               updatePhysActionUI();
-              
-              document.getElementById("phys-condition-toggle").checked = (data.physButton.Condition === "time");
+
+              document.getElementById("phys-condition-toggle").checked =
+                data.physButton.Condition === "time";
               updatePhysConditionUI();
 
-              document.getElementById("set-phys-count").value = data.physButton.Count || 0;
-              document.getElementById("set-phys-start").value = data.physButton.Start || "";
-              document.getElementById("set-phys-end").value = data.physButton.End || "";
+              document.getElementById("set-phys-count").value =
+                data.physButton.Count || 0;
+              document.getElementById("set-phys-start").value =
+                data.physButton.Start || "";
+              document.getElementById("set-phys-end").value =
+                data.physButton.End || "";
             }
           }
         });
 
         // Live update for count decrementing
         onValue(ref(db, "settings/physButton/Count"), (snapshot) => {
-           if(snapshot.exists()) document.getElementById("set-phys-count").value = snapshot.val();
+          if (snapshot.exists())
+            document.getElementById("set-phys-count").value = snapshot.val();
         });
 
         // 3. UI Update Helpers for Toggles
-        window.updatePhysConditionUI = function() {
-          const isTime = document.getElementById("phys-condition-toggle").checked;
-          document.getElementById("phys-cond-time").className = isTime ? "mode-label active-mode" : "mode-label";
-          document.getElementById("phys-cond-count").className = isTime ? "mode-label" : "mode-label active-mode";
-          document.getElementById("phys-time-group").style.display = isTime ? "block" : "none";
-          document.getElementById("phys-count-group").style.display = isTime ? "none" : "block";
+        window.updatePhysConditionUI = function () {
+          const isTime = document.getElementById(
+            "phys-condition-toggle",
+          ).checked;
+          document.getElementById("phys-cond-time").className = isTime
+            ? "mode-label active-mode"
+            : "mode-label";
+          document.getElementById("phys-cond-count").className = isTime
+            ? "mode-label"
+            : "mode-label active-mode";
+          document.getElementById("phys-time-group").style.display = isTime
+            ? "block"
+            : "none";
+          document.getElementById("phys-count-group").style.display = isTime
+            ? "none"
+            : "block";
         };
 
-        window.updatePhysActionUI = function() {
+        window.updatePhysActionUI = function () {
           const isHold = document.getElementById("phys-action-toggle").checked;
-          document.getElementById("phys-act-hold").className = isHold ? "mode-label active-mode" : "mode-label";
-          document.getElementById("phys-act-tap").className = isHold ? "mode-label" : "mode-label active-mode";
+          document.getElementById("phys-act-hold").className = isHold
+            ? "mode-label active-mode"
+            : "mode-label";
+          document.getElementById("phys-act-tap").className = isHold
+            ? "mode-label"
+            : "mode-label active-mode";
         };
 
         const toggle = document.getElementById("mode-toggle");
         const btn = document.getElementById("door-btn");
 
-        window.updateModeUI = function() {
+        window.updateModeUI = function () {
           const isTapMode = toggle.checked;
-          document.getElementById("label-hold").className = isTapMode ? "mode-label" : "mode-label active-mode";
-          document.getElementById("label-tap").className = isTapMode ? "mode-label active-mode" : "mode-label";
+          document.getElementById("label-hold").className = isTapMode
+            ? "mode-label"
+            : "mode-label active-mode";
+          document.getElementById("label-tap").className = isTapMode
+            ? "mode-label active-mode"
+            : "mode-label";
           btn.innerHTML = isTapMode ? "TAP<br>TO UNLOCK" : "HOLD<br>TO UNLOCK";
           btn.style.backgroundColor = isTapMode ? "var(--success)" : "#444";
           // Change slider color based on mode
-          document.querySelector("#mode-toggle + .slider").style.backgroundColor = isTapMode ? "var(--success)" : "#444";
+          document.querySelector(
+            "#mode-toggle + .slider",
+          ).style.backgroundColor = isTapMode ? "var(--success)" : "#444";
         };
 
         // 4. Robust Button Pointer Events (Fixes Mobile Bug & Adds Visual Feedback)
@@ -404,21 +668,26 @@
         });
 
         // 5. Settings Database Update Helper
-        window.updateSetting = function(path, value, isNumber = false, isBool = false) {
+        window.updateSetting = function (
+          path,
+          value,
+          isNumber = false,
+          isBool = false,
+        ) {
           let finalValue = value;
           if (isNumber) finalValue = Number(value);
-          if (isBool) finalValue = value; 
+          if (isBool) finalValue = value;
           set(ref(db, `settings/${path}`), finalValue);
         };
 
         // 6. Ping/Pong Heartbeat
         let currentPingId = "";
         let offlineTimeout = null;
-        
+
         function checkConnection() {
           const spinner = document.getElementById("conn-spinner");
           const text = document.getElementById("conn-text");
-          
+
           spinner.style.display = "inline-block";
           text.innerText = " Pinging Hardware...";
           text.style.color = "var(--text-muted)";
