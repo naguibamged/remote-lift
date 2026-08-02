@@ -26,7 +26,6 @@
         align-items: center;
       }
 
-      /* --- Login Overlay --- */
       #login-overlay {
         position: fixed;
         top: 0;
@@ -68,7 +67,6 @@
         font-weight: bold;
       }
 
-      /* --- Main App UI --- */
       #app-container {
         display: none;
         width: 100%;
@@ -77,7 +75,6 @@
         box-sizing: border-box;
       }
 
-      /* --- Tabs Navigation --- */
       .tabs-header {
         display: flex;
         justify-content: space-between;
@@ -108,7 +105,6 @@
         display: block;
       }
 
-      /* Status & Connection */
       .header-section {
         text-align: center;
         margin-bottom: 20px;
@@ -161,7 +157,6 @@
         background-color: #222;
       }
 
-      /* Reusable Toggle Switch */
       .toggle-container {
         display: flex;
         justify-content: space-between;
@@ -188,7 +183,7 @@
         right: 0;
         bottom: 0;
         background-color: #555;
-        transition: 0.4s;
+        transition: 0.3s;
         border-radius: 34px;
       }
       .slider:before {
@@ -199,7 +194,7 @@
         left: 4px;
         bottom: 4px;
         background-color: white;
-        transition: 0.4s;
+        transition: 0.3s;
         border-radius: 50%;
       }
       input:checked + .slider {
@@ -217,7 +212,6 @@
         color: var(--text-main);
       }
 
-      /* Main Door Button */
       .center-wrapper {
         display: flex;
         flex-direction: column;
@@ -237,14 +231,12 @@
         font-weight: bold;
         cursor: pointer;
         box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
-        transition:
-          transform 0.1s,
-          filter 0.1s,
-          box-shadow 0.1s;
         touch-action: none;
         user-select: none;
-        -webkit-user-select: none;
         margin-top: 20px;
+        transition:
+          transform 0.1s,
+          filter 0.1s;
       }
       .btn-pressed {
         transform: scale(0.94);
@@ -252,7 +244,6 @@
         box-shadow: inset 0 8px 15px rgba(0, 0, 0, 0.8) !important;
       }
 
-      /* Settings Panels */
       .panel {
         background: var(--bg-panel);
         padding: 20px;
@@ -272,15 +263,19 @@
         align-items: center;
         margin-bottom: 15px;
       }
+
+      /* Input transition added for the green flash effect */
       input[type="number"],
-      input[type="time"] {
+      input[type="time"],
+      input[type="date"] {
         background: #222;
         color: white;
         border: 1px solid #555;
         padding: 8px 12px;
         border-radius: 5px;
-        width: 120px;
+        width: 140px;
         font-size: 1rem;
+        transition: background-color 0.3s;
       }
 
       .warning-box {
@@ -291,7 +286,6 @@
         color: #ffcccc;
         margin-bottom: 15px;
       }
-
       .reset-btn {
         background-color: var(--danger);
         color: white;
@@ -303,45 +297,36 @@
         width: 100%;
         font-size: 1rem;
         margin-top: 10px;
-        transition: filter 0.2s;
-      }
-      .reset-btn:active {
-        filter: brightness(0.8);
       }
     </style>
   </head>
   <body>
-    <!-- Standard Login Form for Browser Password Manager -->
     <div id="login-overlay">
-      <form class="login-box" id="login-form">
+      <div class="login-box">
         <h2>System Login</h2>
         <input
           type="text"
           id="login-id"
           placeholder="User ID"
-          autocomplete="username"
-          required
+          onkeydown="handleLoginKeyPress(event)"
         />
         <input
           type="password"
           id="login-pass"
           placeholder="Password"
-          autocomplete="current-password"
-          required
+          onkeydown="handleLoginKeyPress(event)"
         />
-        <button type="submit">Access System</button>
+        <button onclick="attemptLogin()">Access System</button>
         <div
           id="login-error"
           style="color: var(--danger); margin-top: 10px; display: none"
         >
           Invalid credentials
         </div>
-      </form>
+      </div>
     </div>
 
-    <!-- Main Application -->
     <div id="app-container">
-      <!-- Tab Navigation -->
       <div class="tabs-header">
         <button class="tab-btn active" onclick="switchTab('tab-main', this)">
           Main 🔘
@@ -368,7 +353,7 @@
         </div>
       </div>
 
-      <!-- TAB 1: MAIN CONTROLS -->
+      <!-- TAB 1: MAIN -->
       <div id="tab-main" class="tab-content active">
         <div class="center-wrapper">
           <div
@@ -390,7 +375,7 @@
         </div>
       </div>
 
-      <!-- TAB 2: PHYSICAL TRIGGER -->
+      <!-- TAB 2: PHYSICAL -->
       <div id="tab-phys" class="tab-content panel">
         <h3>Physical Trigger</h3>
 
@@ -408,7 +393,6 @@
           </label>
         </div>
 
-        <!-- REVERSED: Hold on the left (unchecked), Tap on the right (checked) -->
         <div class="toggle-container">
           <span id="phys-act-hold" class="mode-label active-mode"
             >Action: Hold</span
@@ -448,7 +432,7 @@
             />
             <span class="slider"></span>
           </label>
-          <span id="phys-cond-time" class="mode-label">Time</span>
+          <span id="phys-cond-time" class="mode-label">Schedule</span>
         </div>
 
         <div id="phys-count-group" style="display: block">
@@ -464,6 +448,47 @@
         </div>
 
         <div id="phys-time-group" style="display: none">
+          <div
+            class="toggle-container"
+            style="
+              margin-top: 15px;
+              border-top: 1px solid #444;
+              padding-top: 15px;
+            "
+          >
+            <span id="phys-date-everyday" class="mode-label active-mode"
+              >Everyday</span
+            >
+            <label class="switch">
+              <input
+                type="checkbox"
+                id="phys-date-toggle"
+                onchange="updatePhysDateUI()"
+              />
+              <span class="slider"></span>
+            </label>
+            <span id="phys-date-period" class="mode-label">Specific Dates</span>
+          </div>
+
+          <div id="phys-date-group" style="display: none">
+            <div class="input-row">
+              <label>Start Date:</label>
+              <input
+                type="date"
+                id="set-phys-start-date"
+                onchange="updateSetting('physButton/StartDate', this.value)"
+              />
+            </div>
+            <div class="input-row">
+              <label>End Date:</label>
+              <input
+                type="date"
+                id="set-phys-end-date"
+                onchange="updateSetting('physButton/EndDate', this.value)"
+              />
+            </div>
+          </div>
+
           <div class="input-row">
             <label>Start Time:</label>
             <input
@@ -483,13 +508,63 @@
         </div>
       </div>
 
-      <!-- TAB 3: KEEP OPEN SCHEDULE -->
+      <!-- TAB 3: KEEP OPEN -->
       <div id="tab-keep" class="tab-content panel">
         <h3>Keep Open Schedule</h3>
-        <div class="warning-box">
-          ⚠️ <strong>Hardware Warning:</strong> Sustained power to a standard
-          solenoid latch can cause overheating and damage to the coil.
+
+        <div class="toggle-container" style="margin-bottom: 15px">
+          <span class="mode-label active-mode">Enable Keep Open</span>
+          <label class="switch">
+            <input
+              type="checkbox"
+              id="keep-enabled-toggle"
+              onchange="
+                updateSetting('keepOpen/Enabled', this.checked, false, true)
+              "
+            />
+            <span class="slider"></span>
+          </label>
         </div>
+
+        <div class="warning-box">
+          ⚠️ <strong>Hardware Warning:</strong> Sustained power to a solenoid
+          latch causes coil overheating. Only enable when necessary.
+        </div>
+
+        <div class="toggle-container" style="margin-bottom: 20px">
+          <span id="keep-date-everyday" class="mode-label active-mode"
+            >Everyday</span
+          >
+          <label class="switch">
+            <input
+              type="checkbox"
+              id="keep-date-toggle"
+              onchange="updateKeepDateUI()"
+            />
+            <span class="slider"></span>
+          </label>
+          <span id="keep-date-period" class="mode-label">Specific Dates</span>
+        </div>
+
+        <div id="keep-date-group" style="display: none">
+          <div class="input-row">
+            <label>Start Date:</label>
+            <input
+              type="date"
+              id="set-keep-start-date"
+              onchange="updateSetting('keepOpen/StartDate', this.value)"
+            />
+          </div>
+          <div class="input-row">
+            <label>End Date:</label>
+            <input
+              type="date"
+              id="set-keep-end-date"
+              onchange="updateSetting('keepOpen/EndDate', this.value)"
+            />
+          </div>
+        </div>
+
         <div class="input-row">
           <label>Start Time:</label>
           <input
@@ -541,8 +616,7 @@
               margin-bottom: 15px;
             "
           >
-            Use this to clear stuck commands if the hardware disconnected
-            unexpectedly while running a task.
+            Clear stuck commands if hardware disconnected unexpectedly.
           </p>
           <button class="reset-btn" onclick="resetSystemState()">
             RESET SYSTEM STATE
@@ -575,13 +649,12 @@
             "
             onclick="logOut()"
           >
-            Log Out
+            Clear Auto-Fill & Refresh
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Firebase v10 SDK -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
       import {
@@ -593,7 +666,6 @@
         onValue,
       } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-      // 🔴 REPLACE WITH YOUR FIREBASE CONFIG
       const firebaseConfig = {
         apiKey: "AIzaSyC4rm0V4SGMexR-G5jR_Tw_mia9iFGDviA",
         authDomain: "remote-lift.firebaseapp.com",
@@ -608,7 +680,6 @@
       const app = initializeApp(firebaseConfig);
       const db = getDatabase(app);
 
-      // --- Tab Switching Logic ---
       window.switchTab = function (tabId, btnElement) {
         document
           .querySelectorAll(".tab-content")
@@ -620,41 +691,46 @@
         btnElement.classList.add("active");
       };
 
-      // --- Authentication Logic ---
+      const savedId = localStorage.getItem("doorUserId");
+      const savedPass = localStorage.getItem("doorUserPass");
+      if (savedId) document.getElementById("login-id").value = savedId;
+      if (savedPass) document.getElementById("login-pass").value = savedPass;
 
-      document
-        .getElementById("login-form")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
+      window.handleLoginKeyPress = function (e) {
+        if (e.key === "Enter") attemptLogin();
+      };
 
-          const userId = document.getElementById("login-id").value;
-          const userPass = document.getElementById("login-pass").value;
-          const errorMsg = document.getElementById("login-error");
+      window.attemptLogin = function () {
+        const userId = document.getElementById("login-id").value;
+        const userPass = document.getElementById("login-pass").value;
+        const errorMsg = document.getElementById("login-error");
 
-          get(child(ref(db), `users/${userId}`))
-            .then((snapshot) => {
-              if (snapshot.exists() && snapshot.val() === userPass) {
-                document.getElementById("login-overlay").style.display = "none";
-                document.getElementById("app-container").style.display =
-                  "block";
-                initializeAppLogic();
-              } else {
-                errorMsg.style.display = "block";
-              }
-            })
-            .catch(() => {
-              errorMsg.innerText = "Connection error.";
+        get(child(ref(db), `users/${userId}`))
+          .then((snapshot) => {
+            if (snapshot.exists() && snapshot.val() === userPass) {
+              localStorage.setItem("doorUserId", userId);
+              localStorage.setItem("doorUserPass", userPass);
+              document.getElementById("login-overlay").style.display = "none";
+              document.getElementById("app-container").style.display = "block";
+              initializeAppLogic();
+            } else {
               errorMsg.style.display = "block";
-            });
-        });
+            }
+          })
+          .catch(() => {
+            errorMsg.innerText = "Connection error.";
+            errorMsg.style.display = "block";
+          });
+      };
 
       window.logOut = function () {
+        localStorage.removeItem("doorUserId");
+        localStorage.removeItem("doorUserPass");
         location.reload();
       };
 
-      // --- Main Application Logic ---
       function initializeAppLogic() {
-        // 1. Live Door State Badge
+        // Live listener for Door Status
         onValue(ref(db, "doorState"), (snapshot) => {
           const state = snapshot.val();
           const badge = document.getElementById("status-badge");
@@ -667,7 +743,24 @@
           }
         });
 
-        // 2. Fetch Initial Settings
+        // Live listener for the Physical Button Count - Ensures immediate visual feedback
+        onValue(ref(db, "settings/physButton/Count"), (snapshot) => {
+          if (snapshot.exists()) {
+            const newCount = snapshot.val();
+            const countInput = document.getElementById("set-phys-count");
+
+            // Only flash green if the value was updated externally (by the ESP hardware)
+            if (countInput.value != newCount && countInput.value !== "") {
+              countInput.style.backgroundColor = "var(--success)";
+              setTimeout(() => {
+                countInput.style.backgroundColor = "#222";
+              }, 400);
+            }
+            countInput.value = newCount;
+          }
+        });
+
+        // Fetch settings once on load to populate fields without looping
         get(child(ref(db), "settings")).then((snapshot) => {
           if (snapshot.exists()) {
             const data = snapshot.val();
@@ -675,16 +768,24 @@
               data.singleTapDuration || 3;
 
             if (data.keepOpen) {
+              document.getElementById("keep-enabled-toggle").checked =
+                data.keepOpen.Enabled || false;
+
+              const isEveryday = data.keepOpen.IsEveryday !== false;
+              document.getElementById("keep-date-toggle").checked = !isEveryday;
+              document.getElementById("set-keep-start-date").value =
+                data.keepOpen.StartDate || "";
+              document.getElementById("set-keep-end-date").value =
+                data.keepOpen.EndDate || "";
               document.getElementById("set-keep-start").value =
                 data.keepOpen.Start || "";
               document.getElementById("set-keep-end").value =
                 data.keepOpen.End || "";
+              updateKeepDateUI(true);
             }
             if (data.physButton) {
               document.getElementById("phys-enabled-toggle").checked =
                 data.physButton.Enabled;
-
-              // REVERSED: Checked = Tap now
               document.getElementById("phys-action-toggle").checked =
                 data.physButton.Action === "tap";
               updatePhysActionUI();
@@ -693,22 +794,22 @@
                 data.physButton.Condition === "time";
               updatePhysConditionUI();
 
-              document.getElementById("set-phys-count").value =
-                data.physButton.Count || 0;
+              const isEveryday = data.physButton.IsEveryday !== false;
+              document.getElementById("phys-date-toggle").checked = !isEveryday;
+              document.getElementById("set-phys-start-date").value =
+                data.physButton.StartDate || "";
+              document.getElementById("set-phys-end-date").value =
+                data.physButton.EndDate || "";
               document.getElementById("set-phys-start").value =
                 data.physButton.Start || "";
               document.getElementById("set-phys-end").value =
                 data.physButton.End || "";
+              updatePhysDateUI(true);
             }
           }
         });
 
-        onValue(ref(db, "settings/physButton/Count"), (snapshot) => {
-          if (snapshot.exists())
-            document.getElementById("set-phys-count").value = snapshot.val();
-        });
-
-        // 3. UI Update Helpers for Toggles
+        // Instant UI Updates (No network calls)
         window.updatePhysConditionUI = function () {
           const isTime = document.getElementById(
             "phys-condition-toggle",
@@ -737,6 +838,40 @@
             : "mode-label active-mode";
         };
 
+        window.updatePhysDateUI = function (isInit = false) {
+          const isPeriod = document.getElementById("phys-date-toggle").checked;
+          document.getElementById("phys-date-period").className = isPeriod
+            ? "mode-label active-mode"
+            : "mode-label";
+          document.getElementById("phys-date-everyday").className = isPeriod
+            ? "mode-label"
+            : "mode-label active-mode";
+          document.getElementById("phys-date-group").style.display = isPeriod
+            ? "block"
+            : "none";
+
+          if (!isInit) {
+            updateSetting("physButton/IsEveryday", !isPeriod, false, true);
+          }
+        };
+
+        window.updateKeepDateUI = function (isInit = false) {
+          const isPeriod = document.getElementById("keep-date-toggle").checked;
+          document.getElementById("keep-date-period").className = isPeriod
+            ? "mode-label active-mode"
+            : "mode-label";
+          document.getElementById("keep-date-everyday").className = isPeriod
+            ? "mode-label"
+            : "mode-label active-mode";
+          document.getElementById("keep-date-group").style.display = isPeriod
+            ? "block"
+            : "none";
+
+          if (!isInit) {
+            updateSetting("keepOpen/IsEveryday", !isPeriod, false, true);
+          }
+        };
+
         const toggle = document.getElementById("mode-toggle");
         const btn = document.getElementById("door-btn");
 
@@ -755,47 +890,39 @@
           ).style.backgroundColor = isTapMode ? "var(--success)" : "#444";
         };
 
-        // 4. Robust Button Pointer Events
-        btn.addEventListener("pointerdown", (e) => {
+        btn.addEventListener("pointerdown", () => {
           btn.classList.add("btn-pressed");
-          if (!toggle.checked) {
-            set(ref(db, "command/hold"), 1);
-          }
+          if (!toggle.checked) set(ref(db, "command/hold"), 1);
         });
 
-        btn.addEventListener("pointerup", (e) => {
+        btn.addEventListener("pointerup", () => {
           btn.classList.remove("btn-pressed");
-          if (!toggle.checked) {
-            set(ref(db, "command/hold"), 0);
-          } else {
-            set(ref(db, "command/tap"), 1);
-          }
+          if (!toggle.checked) set(ref(db, "command/hold"), 0);
+          else set(ref(db, "command/tap"), 1);
         });
 
-        btn.addEventListener("pointerleave", (e) => {
+        btn.addEventListener("pointerleave", () => {
           if (btn.classList.contains("btn-pressed")) {
             btn.classList.remove("btn-pressed");
             if (!toggle.checked) set(ref(db, "command/hold"), 0);
           }
         });
-        btn.addEventListener("pointercancel", (e) => {
+        btn.addEventListener("pointercancel", () => {
           if (btn.classList.contains("btn-pressed")) {
             btn.classList.remove("btn-pressed");
             if (!toggle.checked) set(ref(db, "command/hold"), 0);
           }
         });
 
-        // 5. System Reset Function
         window.resetSystemState = function () {
           set(ref(db, "command/hold"), 0);
           set(ref(db, "command/tap"), 0);
           set(ref(db, "doorState"), 0);
-
           alert("System flags reset to 0.");
           forcePing();
         };
 
-        // 6. Settings Database Update Helper
+        // Highly optimized setting updater - No longer triggers laggy ping cycles
         window.updateSetting = function (
           path,
           value,
@@ -804,21 +931,18 @@
         ) {
           let finalValue = value;
           if (isNumber) finalValue = Number(value);
-          if (isBool) finalValue = value;
+          if (isBool) finalValue = value === true || value === "true";
 
-          set(ref(db, `settings/${path}`), finalValue).then(() => {
-            forcePing();
-          });
+          set(ref(db, `settings/${path}`), finalValue);
         };
 
-        // 7. Ping/Pong Heartbeat Logic
         let currentPingId = "";
         let offlineTimeout = null;
 
+        // Ping is now isolated and only runs when explicitly needed
         function checkConnection() {
           const spinner = document.getElementById("conn-spinner");
           const text = document.getElementById("conn-text");
-
           spinner.style.display = "inline-block";
           text.innerText = " Pinging Hardware...";
           text.style.color = "var(--text-muted)";
@@ -848,11 +972,7 @@
           }
         });
 
-        document.addEventListener("visibilitychange", () => {
-          if (document.visibilityState === "visible") forcePing();
-        });
-        window.addEventListener("focus", forcePing);
-
+        // Run one initial ping on load to verify connection
         checkConnection();
       }
     </script>
