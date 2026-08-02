@@ -3,193 +3,393 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Industrial Hoist Controller</title>
+    <title>Smart Door Controller</title>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        text-align: center;
-        background-color: #222;
-        color: white;
-        margin-top: 50px;
+      :root {
+        --primary: #2196f3;
+        --bg-dark: #1e1e1e;
+        --bg-panel: #2d2d2d;
+        --text-main: #ffffff;
+        --text-muted: #aaaaaa;
+        --danger: #f44336;
+        --success: #4caf50;
       }
 
-      /* Live Status Badge */
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg-dark);
+        color: var(--text-main);
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* --- Login Overlay --- */
+      #login-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      .login-box {
+        background: var(--bg-panel);
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+      .login-box input {
+        display: block;
+        margin: 10px auto;
+        padding: 10px;
+        width: 80%;
+        border-radius: 5px;
+        border: 1px solid #555;
+        background: #222;
+        color: white;
+      }
+      .login-box button {
+        margin-top: 15px;
+        padding: 10px 20px;
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      /* --- Main App UI --- */
+      #app-container {
+        display: none; /* Hidden until login */
+        width: 100%;
+        max-width: 500px;
+      }
+
+      /* Status & Connection */
+      .header-section {
+        text-align: center;
+        margin-bottom: 20px;
+      }
       #status-badge {
         font-size: 1.2rem;
         font-weight: bold;
         padding: 15px 30px;
         border-radius: 8px;
         background-color: #555;
-        color: white;
-        margin: 20px auto;
-        width: fit-content;
-        transition: background-color 0.3s ease;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        display: inline-block;
+        margin-top: 10px;
+        transition: background-color 0.3s;
       }
-
-      /* 3D Button Styling */
-      .btn {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: white;
-        border: none;
-        border-radius: 10px;
-        padding: 20px 40px;
-        margin: 10px;
-        cursor: pointer;
-        transition: all 0.1s ease;
-        box-shadow: 0px 8px 0px #111;
-        position: relative;
-        user-select: none; /* Prevents text highlighting on mobile taps */
-        -webkit-user-select: none;
+      .conn-ui {
+        font-size: 0.9rem;
+        margin-top: 10px;
+        height: 20px;
       }
-
-      .btn:active {
-        box-shadow: 0px 2px 0px #111;
-        top: 6px;
-        transform: scale(0.98);
-      }
-
-      .btn-up {
-        background-color: #4caf50;
-      }
-      .btn-down {
-        background-color: #2196f3;
-      }
-
-      .btn-up:hover {
-        background-color: #45a049;
-      }
-      .btn-down:hover {
-        background-color: #1a76c0;
-      }
-
-      /* Auto-Lift Section */
-      .auto-panel {
-        background-color: #333;
-        margin: 40px auto;
-        padding: 20px;
-        max-width: 400px;
-        border-radius: 10px;
-        border: 2px dashed #666;
-      }
-
-      input[type="number"] {
-        font-size: 1.2rem;
-        width: 60px;
-        padding: 5px;
-        text-align: center;
-        border-radius: 5px;
-        border: none;
-      }
-
-      /* --- Connection UI Animations --- */
-      #connection-ui {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 30px; /* Reserves space so the page doesn't jump */
-        margin-bottom: 20px;
-      }
-
-      /* The Spinning Circle */
       .spinner {
-        width: 24px;
-        height: 24px;
-        border: 3px solid rgba(255, 255, 255, 0.2);
-        border-top-color: #ffeb3b; /* Yellow */
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #ffeb3b;
         border-radius: 50%;
         animation: spin 1s linear infinite;
-        display: none; /* Hidden by default */
       }
-
       @keyframes spin {
         to {
           transform: rotate(360deg);
         }
       }
 
-      /* The Success Tick */
-      .tick {
-        color: #4caf50; /* Green */
-        font-size: 1.5rem;
-        display: none; /* Hidden by default */
+      /* Main Control Panel */
+      .control-panel {
+        background: var(--bg-panel);
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        margin-bottom: 20px;
       }
 
-      /* The Error Message */
-      .conn-error {
-        color: #f44336;
-        font-size: 0.9rem;
-        display: none;
+      /* Toggle Switch */
+      .toggle-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--primary);
+        transition: 0.4s;
+        border-radius: 34px;
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+      input:checked + .slider {
+        background-color: var(--success);
+      }
+      input:checked + .slider:before {
+        transform: translateX(26px);
+      }
+      .mode-label {
+        transition: color 0.3s;
+      }
+      .active-mode {
+        color: var(--success);
+      }
+
+      /* Main Door Button */
+      #door-btn {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        border: none;
+        background-color: #444;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+        transition: all 0.1s;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      #door-btn:active {
+        transform: scale(0.95);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+      }
+
+      /* Settings Panel */
+      .settings-panel {
+        background: var(--bg-panel);
+        padding: 20px;
+        border-radius: 10px;
+      }
+      .settings-group {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #444;
+      }
+      .settings-group:last-child {
+        border-bottom: none;
+      }
+      .settings-group h3 {
+        margin-top: 0;
+        font-size: 1.1rem;
+        color: var(--primary);
+      }
+
+      .input-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      input[type="number"],
+      input[type="time"],
+      select {
+        background: #222;
+        color: white;
+        border: 1px solid #555;
+        padding: 5px 10px;
+        border-radius: 5px;
+      }
+
+      .warning-box {
+        background: rgba(244, 67, 54, 0.1);
+        border-left: 4px solid var(--danger);
+        padding: 10px;
+        font-size: 0.85rem;
+        color: #ffcccc;
+        margin-top: 10px;
       }
     </style>
   </head>
   <body>
-    <h1>Hoist Controller</h1>
-
-    <div id="status-badge">
-      <!-- The main text -->
-      <span id="badge-text">SYSTEM IDLE ⏹️</span>
-      <!-- The timer span (empty by default, slightly smaller/lighter) -->
-      <span id="badge-timer"></span>
+    <!-- Login Overlay -->
+    <div id="login-overlay">
+      <div class="login-box">
+        <h2>System Login</h2>
+        <input type="text" id="login-id" placeholder="User ID" />
+        <input type="password" id="login-pass" placeholder="Password" />
+        <button onclick="attemptLogin()">Access System</button>
+        <div
+          id="login-error"
+          style="color: var(--danger); margin-top: 10px; display: none"
+        >
+          Invalid credentials
+        </div>
+      </div>
     </div>
-    <!-- The Ping/Pong Connection Indicator -->
-    <div id="connection-ui">
-      <div id="conn-spinner" class="spinner"></div>
-      <div id="conn-tick" class="tick">✔️</div>
-      <div id="conn-error" class="conn-error">🔴 Offline</div>
-    </div>
 
-    <h2>Manual Control</h2>
-    <p>Hold to run, release to stop.</p>
-    <!-- Mouse and Touch events to handle both PC and Mobile -->
-    <button
-      class="btn btn-up"
-      onmousedown="startManual(1)"
-      onmouseup="stopManual()"
-      onmouseleave="stopManual()"
-      ontouchstart="startManual(1); event.preventDefault();"
-      ontouchend="stopManual(); event.preventDefault();"
-    >
-      HOLD UP ⬆️
-    </button>
-    <button
-      class="btn btn-down"
-      onmousedown="startManual(2)"
-      onmouseup="stopManual()"
-      onmouseleave="stopManual()"
-      ontouchstart="startManual(2); event.preventDefault();"
-      ontouchend="stopManual(); event.preventDefault();"
-    >
-      HOLD DOWN ⬇️
-    </button>
+    <!-- Main Application -->
+    <div id="app-container">
+      <div class="header-section">
+        <h2>Smart Door Control</h2>
+        <div id="status-badge">SYSTEM LOCKED 🔒</div>
+        <div class="conn-ui">
+          <span id="conn-spinner" class="spinner" style="display: none"></span>
+          <span id="conn-text" style="color: var(--text-muted)"
+            >Checking connection...</span
+          >
+        </div>
+      </div>
 
-    <div class="auto-panel">
-      <h2>Auto-Lift</h2>
-      <label>Duration (Seconds): </label>
-      <input
-        type="number"
-        id="auto-time"
-        value="10"
-        min="1"
-        max="60"
-        onchange="if (this.value < 1) this.value = 1;"
-      />
-      <br /><br />
-      <button
-        class="btn btn-up"
-        style="padding: 10px 20px; font-size: 1.2rem"
-        onclick="triggerAuto(1)"
-      >
-        AUTO UP
-      </button>
-      <button
-        class="btn btn-down"
-        style="padding: 10px 20px; font-size: 1.2rem"
-        onclick="triggerAuto(2)"
-      >
-        AUTO DOWN
-      </button>
+      <div class="control-panel">
+        <div class="toggle-container">
+          <span id="label-hold" class="mode-label active-mode">Hold Mode</span>
+          <label class="switch">
+            <input type="checkbox" id="mode-toggle" onchange="updateModeUI()" />
+            <span class="slider"></span>
+          </label>
+          <span id="label-tap" class="mode-label">Tap Mode</span>
+        </div>
+
+        <button id="door-btn">HOLD<br />TO UNLOCK</button>
+      </div>
+
+      <div class="settings-panel">
+        <div class="settings-group">
+          <h3>Web App Settings</h3>
+          <div class="input-row">
+            <label>Single Tap Duration (sec):</label>
+            <input
+              type="number"
+              id="set-tap-dur"
+              min="1"
+              max="60"
+              onchange="updateSetting('singleTapDuration', this.value, true)"
+            />
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h3>Keep Open Schedule</h3>
+          <div class="warning-box">
+            ⚠️ <strong>Hardware Warning:</strong> Sustained power to a standard
+            solenoid latch can cause severe overheating and permanent damage to
+            the coil.
+          </div>
+          <div class="input-row">
+            <label>Start Time:</label>
+            <input
+              type="time"
+              id="set-keep-start"
+              onchange="updateSetting('keepOpen/Start', this.value)"
+            />
+          </div>
+          <div class="input-row">
+            <label>End Time:</label>
+            <input
+              type="time"
+              id="set-keep-end"
+              onchange="updateSetting('keepOpen/End', this.value)"
+            />
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h3>Physical Trigger Settings</h3>
+          <div class="input-row">
+            <label>Enable Button:</label>
+            <select
+              id="set-phys-enabled"
+              onchange="
+                updateSetting(
+                  'physButton/Enabled',
+                  this.value === 'true',
+                  false,
+                  true,
+                )
+              "
+            >
+              <option value="true">Enabled</option>
+              <option value="false">Disabled</option>
+            </select>
+          </div>
+          <div class="input-row">
+            <label>Action:</label>
+            <select
+              id="set-phys-action"
+              onchange="updateSetting('physButton/Action', this.value)"
+            >
+              <option value="tap">Single Tap</option>
+              <option value="hold">Hold Open</option>
+            </select>
+          </div>
+          <div class="input-row">
+            <label>Condition:</label>
+            <select
+              id="set-phys-condition"
+              onchange="updateSetting('physButton/Condition', this.value)"
+            >
+              <option value="count">Count Based</option>
+              <option value="time">Time Based</option>
+            </select>
+          </div>
+          <div class="input-row">
+            <label>Allowed Clicks (Count):</label>
+            <input
+              type="number"
+              id="set-phys-count"
+              min="0"
+              onchange="updateSetting('physButton/Count', this.value, true)"
+            />
+          </div>
+          <div class="input-row">
+            <label>Start Time:</label>
+            <input
+              type="time"
+              id="set-phys-start"
+              onchange="updateSetting('physButton/Start', this.value)"
+            />
+          </div>
+          <div class="input-row">
+            <label>End Time:</label>
+            <input
+              type="time"
+              id="set-phys-end"
+              onchange="updateSetting('physButton/End', this.value)"
+            />
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Firebase v10 SDK -->
@@ -199,10 +399,12 @@
         getDatabase,
         ref,
         set,
+        get,
+        child,
         onValue,
       } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-      // 🔴 REPLACE THESE WITH YOUR FIREBASE CREDENTIALS 🔴
+      // 🔴 REPLACE WITH YOUR FIREBASE CONFIG
       const firebaseConfig = {
         apiKey: "AIzaSyC4rm0V4SGMexR-G5jR_Tw_mia9iFGDviA",
         authDomain: "remote-lift.firebaseapp.com",
@@ -212,155 +414,184 @@
         storageBucket: "remote-lift.firebasestorage.app",
         messagingSenderId: "547559400957",
         appId: "1:547559400957:web:a82b71b38d6408b3592594",
-        measurementId: "G-MHG5C8TBLH",
       };
 
       const app = initializeApp(firebaseConfig);
       const db = getDatabase(app);
 
-      // --- Variables for the Timer Logic ---
-      let countdownInterval;
-      let previousState = 0;
-      let isAutoModeActive = false;
-      let timeRemaining = 0;
-      // --- 1. Live Status & Timer Listener ---
-      onValue(ref(db, "state"), (snapshot) => {
-        const state = snapshot.val();
-        const badge = document.getElementById("status-badge");
-        const badgeText = document.getElementById("badge-text");
-        const badgeTimer = document.getElementById("badge-timer");
+      // --- Authentication ---
+      window.attemptLogin = function () {
+        const userId = document.getElementById("login-id").value;
+        const userPass = document.getElementById("login-pass").value;
+        const errorMsg = document.getElementById("login-error");
 
-        // Apply the base text and color instantly
-        if (state === 1) {
-          badgeText.innerText = "MOVING UP ⬆️";
-          badge.style.backgroundColor = "#4CAF50";
-        } else if (state === 2) {
-          badgeText.innerText = "MOVING DOWN ⬇️";
-          badge.style.backgroundColor = "#2196f3";
-        } else {
-          badgeText.innerText = "SYSTEM IDLE ⏹️";
-          badge.style.backgroundColor = "#555";
-        }
+        get(child(ref(db), `users/${userId}`))
+          .then((snapshot) => {
+            if (snapshot.exists() && snapshot.val() === userPass) {
+              document.getElementById("login-overlay").style.display = "none";
+              document.getElementById("app-container").style.display = "block";
+              initializeAppLogic(); // Start tracking database only after login
+            } else {
+              errorMsg.style.display = "block";
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+            errorMsg.innerText = "Connection error.";
+            errorMsg.style.display = "block";
+          });
+      };
 
-        // Timer Logic
-        if (state !== 0) {
-          if (previousState === 0 && isAutoModeActive) {
-            clearInterval(countdownInterval);
-            timeRemaining = parseInt(
-              document.getElementById("auto-time").value,
-            );
+      // --- Main Application Logic ---
+      function initializeAppLogic() {
+        // 1. Live Door State Badge
+        onValue(ref(db, "doorState"), (snapshot) => {
+          const state = snapshot.val();
+          const badge = document.getElementById("status-badge");
+          if (state === 1) {
+            badge.innerText = "DOOR UNLOCKED 🔓";
+            badge.style.backgroundColor = "var(--success)";
+          } else {
+            badge.innerText = "SYSTEM LOCKED 🔒";
+            badge.style.backgroundColor = "#555";
+          }
+        });
 
-            if (timeRemaining > 0) {
-              // Write to the separate span element
-              document.getElementById("badge-timer").style.display = "inline";
-              badgeTimer.innerText = `(${timeRemaining})`;
+        // 2. Fetch Initial Settings and Populate Inputs
+        get(child(ref(db), "settings")).then((snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            document.getElementById("set-tap-dur").value =
+              data.singleTapDuration || 3;
 
-              countdownInterval = setInterval(() => {
-                timeRemaining--;
-                if (timeRemaining >= 0) {
-                  // Only update the timer span, leave the main text alone
-                  document.getElementById("badge-timer").style.display =
-                    "inline";
-                  badgeTimer.innerText = `(${timeRemaining})`;
-                }
-              }, 1000);
+            if (data.keepOpen) {
+              document.getElementById("set-keep-start").value =
+                data.keepOpen.Start || "";
+              document.getElementById("set-keep-end").value =
+                data.keepOpen.End || "";
+            }
+            if (data.physButton) {
+              document.getElementById("set-phys-enabled").value = data
+                .physButton.Enabled
+                ? "true"
+                : "false";
+              document.getElementById("set-phys-action").value =
+                data.physButton.Action || "tap";
+              document.getElementById("set-phys-condition").value =
+                data.physButton.Condition || "count";
+              document.getElementById("set-phys-count").value =
+                data.physButton.Count || 0;
+              document.getElementById("set-phys-start").value =
+                data.physButton.Start || "";
+              document.getElementById("set-phys-end").value =
+                data.physButton.End || "";
             }
           }
-        } else {
-          // System is IDLE
-          clearInterval(countdownInterval);
-          isAutoModeActive = false;
-          // Clear the timer span so it disappears
-          document.getElementById("badge-timer").style.display = "none";
+        });
+
+        // Live update for count (so you see it decrement on the web app when physical button is pressed)
+        onValue(ref(db, "settings/physButton/Count"), (snapshot) => {
+          if (snapshot.exists()) {
+            document.getElementById("set-phys-count").value = snapshot.val();
+          }
+        });
+
+        // 3. Main Button Interaction Logic
+        const btn = document.getElementById("door-btn");
+        const toggle = document.getElementById("mode-toggle");
+
+        // UI Toggle visually updates labels
+        window.updateModeUI = function () {
+          const isTapMode = toggle.checked;
+          document.getElementById("label-hold").className = isTapMode
+            ? "mode-label"
+            : "mode-label active-mode";
+          document.getElementById("label-tap").className = isTapMode
+            ? "mode-label active-mode"
+            : "mode-label";
+          btn.innerHTML = isTapMode ? "TAP<br>TO UNLOCK" : "HOLD<br>TO UNLOCK";
+          btn.style.backgroundColor = isTapMode ? "var(--success)" : "#444";
+        };
+
+        // Button Events
+        function handlePress(e) {
+          e.preventDefault();
+          if (!toggle.checked) set(ref(db, "command/hold"), 1); // Hold Mode
+        }
+        function handleRelease(e) {
+          e.preventDefault();
+          if (!toggle.checked) set(ref(db, "command/hold"), 0); // Hold Mode
+        }
+        function handleClick(e) {
+          e.preventDefault();
+          if (toggle.checked) {
+            set(ref(db, "command/tap"), 1); // Tap Mode
+            // Optional visual feedback for tap
+            btn.style.transform = "scale(0.9)";
+            setTimeout(() => (btn.style.transform = "scale(1)"), 150);
+          }
         }
 
-        previousState = state;
-      });
+        btn.addEventListener("mousedown", handlePress);
+        btn.addEventListener("touchstart", handlePress);
+        btn.addEventListener("mouseup", handleRelease);
+        btn.addEventListener("touchend", handleRelease);
+        btn.addEventListener("mouseleave", handleRelease);
+        btn.addEventListener("click", handleClick);
 
-      // --- 2. Manual Controls ---
-      window.startManual = function (direction) {
-        // Instantly kill the timer display so the layout doesn't jump under your finger
-        isAutoModeActive = false;
-        document.getElementById("badge-timer").style.display = "none";
-        clearInterval(countdownInterval);
-        set(ref(db, "autoLift"), "{direction:0,duration:0}");
+        // 4. Update Settings Helper Function
+        window.updateSetting = function (
+          path,
+          value,
+          isNumber = false,
+          isBool = false,
+        ) {
+          let finalValue = value;
+          if (isNumber) finalValue = Number(value);
+          if (isBool) finalValue = value; // Passed as actual boolean from HTML select
 
-        set(ref(db, "lift"), direction);
-      };
+          set(ref(db, `settings/${path}`), finalValue).then(() => {
+            console.log(`${path} updated to ${finalValue}`);
+          });
+        };
 
-      window.stopManual = function () {
-        set(ref(db, "lift"), 0);
-      };
+        // 5. Ping/Pong Heartbeat Monitor
+        let currentPingId = "";
+        let offlineTimeout = null;
 
-      // --- 3. Auto-Lift Controls ---
-      window.triggerAuto = function (direction) {
-        isAutoModeActive = true; // Tell the system an Auto sequence started
-
-        const seconds = document.getElementById("auto-time").value;
-        if (seconds < 1 || isNaN(seconds)) {
-          seconds = 1;
-          document.getElementById("auto-time").value = 1; // Update the UI to match
-        }
-        timeRemaining = seconds;
-        const payload = `{direction:${direction},duration:${seconds}}`;
-        set(ref(db, "autoLift"), payload);
-      };
-
-      /// --- 4. The Ping/Pong Connection Monitor ---
-      let currentPingId = "";
-      let offlineTimeout = null;
-
-      function checkHardwareConnection() {
-        const spinner = document.getElementById("conn-spinner");
-        const tick = document.getElementById("conn-tick");
-        const errorMsg = document.getElementById("conn-error");
-
-        // 1. Reset the UI: Show spinner, hide the tick and errors
-        spinner.style.display = "block";
-        tick.style.display = "none";
-        errorMsg.style.display = "none";
-
-        // 2. Generate ID and send Ping
-        currentPingId = Date.now().toString();
-        set(ref(db, "ping"), currentPingId);
-
-        // 3. Start 3-second offline timer
-        if (offlineTimeout) clearTimeout(offlineTimeout);
-        offlineTimeout = setTimeout(() => {
-          spinner.style.display = "none";
-          errorMsg.style.display = "block"; // Only show error if the ESP32 fails to reply
-        }, 3000);
-      }
-
-      // Listener to catch the Pong
-      onValue(ref(db, "pong"), (snapshot) => {
-        const returnedPongId = snapshot.val();
-
-        // If the ESP32 echoed back our exact ping...
-        if (returnedPongId === currentPingId) {
-          if (offlineTimeout) clearTimeout(offlineTimeout); // Stop the error timer
-
+        function checkConnection() {
           const spinner = document.getElementById("conn-spinner");
-          const tick = document.getElementById("conn-tick");
+          const text = document.getElementById("conn-text");
 
-          // Swap the spinner for the green tick
-          spinner.style.display = "none";
-          tick.style.display = "block";
+          spinner.style.display = "inline-block";
+          text.innerText = " Pinging Hardware...";
+          text.style.color = "var(--text-muted)";
 
-          // Wait exactly 1 second (1000ms), then make the tick disappear
-          setTimeout(() => {
-            tick.style.display = "none";
-          }, 1000);
+          currentPingId = Date.now().toString();
+          set(ref(db, "ping"), currentPingId);
+
+          if (offlineTimeout) clearTimeout(offlineTimeout);
+          offlineTimeout = setTimeout(() => {
+            spinner.style.display = "none";
+            text.innerText = " 🔴 Hardware Offline";
+            text.style.color = "var(--danger)";
+          }, 3000);
         }
-      });
 
-      // Fire the ping on page load and tab wake-up
-      window.onload = checkHardwareConnection;
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible") {
-          checkHardwareConnection();
-        }
-      });
+        onValue(ref(db, "pong"), (snapshot) => {
+          if (snapshot.val() === currentPingId) {
+            if (offlineTimeout) clearTimeout(offlineTimeout);
+            document.getElementById("conn-spinner").style.display = "none";
+            const text = document.getElementById("conn-text");
+            text.innerText = " ✔️ Hardware Online";
+            text.style.color = "var(--success)";
+          }
+        });
+
+        // Initial check and set interval
+        checkConnection();
+        setInterval(checkConnection, 10000); // Check every 10 seconds
+      }
     </script>
   </body>
 </html>
